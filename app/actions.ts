@@ -57,15 +57,39 @@ export async function sendEmailToASP(aspId: string) {
   const transport = createSmtpTransport()
   const subject = EMAIL_SUBJECT
 
-  const info = await transport.sendMail({
+  const mailOptions = {
     from: `Paul Winick <${EMAIL_USER}>`,
     to: asp.email,
     subject,
     text: buildEmailText(firstName),
     html: buildEmailHtml(firstName),
-  })
+  }
 
+  const info = await transport.sendMail(mailOptions)
   const messageId = (info.messageId as string | undefined)?.replace(/[<>]/g, '') ?? null
+
+  // Append a copy to the Sent folder via IMAP
+  try {
+    const { ImapFlow } = await import('imapflow')
+    // @ts-ignore — subpath import, no types
+    const MailComposer = (await import('nodemailer/lib/mail-composer')).default
+    const rawMessage = await new Promise<Buffer>((resolve, reject) => {
+      new MailComposer(mailOptions).compile().build((err: Error | null, buf: Buffer) => {
+        if (err) reject(err); else resolve(buf)
+      })
+    })
+    const imap = new ImapFlow(getImapConfig())
+    await imap.connect()
+    try {
+      const mailboxes = await imap.list()
+      const sentPath = (mailboxes as any[]).find(m => m.specialUse === '\\Sent')?.path ?? 'Sent'
+      await imap.append(sentPath, rawMessage, ['\\Seen'], new Date())
+    } finally {
+      await imap.logout()
+    }
+  } catch (err) {
+    console.error('Sent folder append failed (non-fatal):', err)
+  }
 
   await supabase.from('emails').insert({
     asp_id: aspId,

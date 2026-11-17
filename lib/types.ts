@@ -10,14 +10,18 @@ export interface ASP {
   email: string | null
   phone: string | null
   status: ASPStatus
-  q1_year1_cost: string | null
-  q1_renewal_cost: string | null
+  // Option 1: Freemium
+  q1_freemium: boolean | null
+  q1_invoice_limit: string | null
   q1_notes: string | null
+  // Option 2: Manual / CSV upload
   q2_year1_cost: string | null
   q2_renewal_cost: string | null
   q2_notes: string | null
-  q3_freemium: boolean | null
-  q3_freemium_notes: string | null
+  // Option 3: Integration (QuickBooks etc.)
+  q3_year1_cost: string | null
+  q3_renewal_cost: string | null
+  q3_notes: string | null
   general_notes: string | null
   last_contacted: string | null
   created_at: string

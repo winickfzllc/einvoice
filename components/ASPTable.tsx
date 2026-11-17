@@ -33,9 +33,9 @@ function exportCSV(asps: ASP[]) {
   const headers = [
     '#', 'Name', 'Accreditation #', 'Website', 'Contact Person', 'Email', 'Phone',
     'Status', 'Last Contacted',
-    'Q1 Year 1 Cost', 'Q1 Renewal Cost', 'Q1 Notes',
-    'Q2 Year 1 Cost', 'Q2 Renewal Cost', 'Q2 Notes',
-    'Q3 Freemium', 'Q3 Notes',
+    'Option 1 Freemium', 'Option 1 Invoice Limit', 'Option 1 Notes',
+    'Option 2 Year 1 Cost', 'Option 2 Renewal Cost', 'Option 2 Notes',
+    'Option 3 Year 1 Cost', 'Option 3 Renewal Cost', 'Option 3 Notes',
     'General Notes',
   ]
   const rows = asps.map(a => [
@@ -48,14 +48,15 @@ function exportCSV(asps: ASP[]) {
     a.phone ?? '',
     a.status,
     a.last_contacted ?? '',
-    a.q1_year1_cost ?? '',
-    a.q1_renewal_cost ?? '',
+    a.q1_freemium == null ? '' : a.q1_freemium ? 'Yes' : 'No',
+    a.q1_invoice_limit ?? '',
     a.q1_notes ?? '',
     a.q2_year1_cost ?? '',
     a.q2_renewal_cost ?? '',
     a.q2_notes ?? '',
-    a.q3_freemium == null ? '' : a.q3_freemium ? 'Yes' : 'No',
-    a.q3_freemium_notes ?? '',
+    a.q3_year1_cost ?? '',
+    a.q3_renewal_cost ?? '',
+    a.q3_notes ?? '',
     a.general_notes ?? '',
   ])
 
@@ -264,16 +265,16 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
                     <td className="px-4 py-3">
                       <div className="flex gap-1 justify-center">
                         <ResearchDot
-                          filled={!!(asp.q1_year1_cost || asp.q1_renewal_cost)}
-                          label="Q1"
+                          filled={asp.q1_freemium !== null}
+                          label="O1"
                         />
                         <ResearchDot
                           filled={!!(asp.q2_year1_cost || asp.q2_renewal_cost)}
-                          label="Q2"
+                          label="O2"
                         />
                         <ResearchDot
-                          filled={asp.q3_freemium !== null}
-                          label="Q3"
+                          filled={!!(asp.q3_year1_cost || asp.q3_renewal_cost)}
+                          label="O3"
                         />
                       </div>
                     </td>

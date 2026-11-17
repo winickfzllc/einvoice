@@ -51,14 +51,15 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
   const [form, setForm] = useState({
     status: asp.status as ASPStatus,
     last_contacted: asp.last_contacted ?? '',
-    q1_year1_cost: asp.q1_year1_cost ?? '',
-    q1_renewal_cost: asp.q1_renewal_cost ?? '',
+    q1_freemium: asp.q1_freemium,
+    q1_invoice_limit: asp.q1_invoice_limit ?? '',
     q1_notes: asp.q1_notes ?? '',
     q2_year1_cost: asp.q2_year1_cost ?? '',
     q2_renewal_cost: asp.q2_renewal_cost ?? '',
     q2_notes: asp.q2_notes ?? '',
-    q3_freemium: asp.q3_freemium,
-    q3_freemium_notes: asp.q3_freemium_notes ?? '',
+    q3_year1_cost: asp.q3_year1_cost ?? '',
+    q3_renewal_cost: asp.q3_renewal_cost ?? '',
+    q3_notes: asp.q3_notes ?? '',
     general_notes: asp.general_notes ?? '',
   })
 
@@ -74,13 +75,14 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
         await updateASP(asp.id, {
           ...form,
           last_contacted: form.last_contacted || null,
-          q1_year1_cost: form.q1_year1_cost || null,
-          q1_renewal_cost: form.q1_renewal_cost || null,
+          q1_invoice_limit: form.q1_invoice_limit || null,
           q1_notes: form.q1_notes || null,
           q2_year1_cost: form.q2_year1_cost || null,
           q2_renewal_cost: form.q2_renewal_cost || null,
           q2_notes: form.q2_notes || null,
-          q3_freemium_notes: form.q3_freemium_notes || null,
+          q3_year1_cost: form.q3_year1_cost || null,
+          q3_renewal_cost: form.q3_renewal_cost || null,
+          q3_notes: form.q3_notes || null,
           general_notes: form.general_notes || null,
         })
         setSaved(true)
@@ -179,91 +181,19 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
         </div>
       </div>
 
-      {/* Q1 */}
+      {/* Option 1: Freemium */}
       <Section
-        title="Q1 — Manual / CSV Upload Pricing (< 100 invoices/year)"
-        description="What is the pricing for onboarding and platform fee for manual input or Excel/CSV upload for less than 100 invoices per year?"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Year 1 Full Cost (inc. onboarding)" hint="All-in cost for year one">
-            <input
-              type="text"
-              placeholder="e.g. AED 2,500 (AED 1,000 onboarding + AED 1,500 platform)"
-              value={form.q1_year1_cost}
-              onChange={e => set('q1_year1_cost', e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Annual Renewal Cost" hint="Ongoing cost from year 2+">
-            <input
-              type="text"
-              placeholder="e.g. AED 1,500/year"
-              value={form.q1_renewal_cost}
-              onChange={e => set('q1_renewal_cost', e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-        </div>
-        <Field label="Additional Notes">
-          <textarea
-            rows={3}
-            placeholder="e.g. Includes up to 100 invoices/year. Additional invoices charged at AED 5 each."
-            value={form.q1_notes}
-            onChange={e => set('q1_notes', e.target.value)}
-            className={textareaClass}
-          />
-        </Field>
-      </Section>
-
-      {/* Q2 */}
-      <Section
-        title="Q2 — QuickBooks Integration Pricing"
-        description="Pricing for QuickBooks integration including Year 1 (inc. onboarding) and annual renewal thereafter."
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Year 1 Full Cost (inc. onboarding)" hint="All-in cost for year one with QuickBooks integration">
-            <input
-              type="text"
-              placeholder="e.g. AED 5,000 (AED 2,000 onboarding + AED 3,000 platform)"
-              value={form.q2_year1_cost}
-              onChange={e => set('q2_year1_cost', e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Annual Renewal Cost" hint="Ongoing cost from year 2+">
-            <input
-              type="text"
-              placeholder="e.g. AED 3,000/year"
-              value={form.q2_renewal_cost}
-              onChange={e => set('q2_renewal_cost', e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-        </div>
-        <Field label="Additional Notes">
-          <textarea
-            rows={3}
-            placeholder="e.g. Native QuickBooks connector. Setup takes 2-3 days."
-            value={form.q2_notes}
-            onChange={e => set('q2_notes', e.target.value)}
-            className={textareaClass}
-          />
-        </Field>
-      </Section>
-
-      {/* Q3 */}
-      <Section
-        title="Q3 — Freemium / Free Portal Option"
-        description="Do they offer a freemium option where you can use their web portal with minimal support to enter 10-20 invoices per year at no cost?"
+        title="Option 1 — Freemium"
+        description="Do they offer a free tier? If so, how many invoices are included at no cost?"
       >
         <Field label="Freemium Available?">
           <div className="flex gap-3">
             {([true, false, null] as const).map(val => (
               <button
                 key={String(val)}
-                onClick={() => set('q3_freemium', val)}
+                onClick={() => set('q1_freemium', val)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                  form.q3_freemium === val
+                  form.q1_freemium === val
                     ? val === true
                       ? 'bg-emerald-600 text-white border-emerald-600'
                       : val === false
@@ -277,12 +207,93 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
             ))}
           </div>
         </Field>
+        <Field label="Invoice Limit on Free Tier" hint="How many invoices/documents are included at no cost?">
+          <input
+            type="text"
+            placeholder="e.g. 120 documents/year (incoming + outgoing combined)"
+            value={form.q1_invoice_limit}
+            onChange={e => set('q1_invoice_limit', e.target.value)}
+            className={inputClass}
+          />
+        </Field>
         <Field label="Notes">
           <textarea
             rows={3}
-            placeholder="e.g. Offers a free tier for up to 20 invoices/year via web portal. No phone support included."
-            value={form.q3_freemium_notes}
-            onChange={e => set('q3_freemium_notes', e.target.value)}
+            placeholder="e.g. Includes manual portal entry and XML upload. No Excel upload on free tier."
+            value={form.q1_notes}
+            onChange={e => set('q1_notes', e.target.value)}
+            className={textareaClass}
+          />
+        </Field>
+      </Section>
+
+      {/* Option 2: Manual / CSV */}
+      <Section
+        title="Option 2 — Manual Input / CSV Upload (< 100 invoices/year)"
+        description="Pricing for onboarding and platform fee for manual input or Excel/CSV upload for less than 100 invoices per year."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Year 1 Full Cost (inc. onboarding)" hint="All-in cost for year one">
+            <input
+              type="text"
+              placeholder="e.g. AED 2,500 (AED 1,000 onboarding + AED 1,500 platform)"
+              value={form.q2_year1_cost}
+              onChange={e => set('q2_year1_cost', e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Annual Renewal Cost" hint="Ongoing cost from year 2+">
+            <input
+              type="text"
+              placeholder="e.g. AED 1,500/year"
+              value={form.q2_renewal_cost}
+              onChange={e => set('q2_renewal_cost', e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+        <Field label="Additional Notes">
+          <textarea
+            rows={3}
+            placeholder="e.g. Includes up to 100 invoices/year. Additional invoices charged at AED 5 each."
+            value={form.q2_notes}
+            onChange={e => set('q2_notes', e.target.value)}
+            className={textareaClass}
+          />
+        </Field>
+      </Section>
+
+      {/* Option 3: Integration */}
+      <Section
+        title="Option 3 — Integration (QuickBooks / ERP)"
+        description="Pricing for QuickBooks or ERP integration including Year 1 (inc. onboarding) and annual renewal thereafter."
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Year 1 Full Cost (inc. onboarding)" hint="All-in cost for year one with integration">
+            <input
+              type="text"
+              placeholder="e.g. AED 5,000 (AED 2,000 onboarding + AED 3,000 platform)"
+              value={form.q3_year1_cost}
+              onChange={e => set('q3_year1_cost', e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Annual Renewal Cost" hint="Ongoing cost from year 2+">
+            <input
+              type="text"
+              placeholder="e.g. AED 3,000/year"
+              value={form.q3_renewal_cost}
+              onChange={e => set('q3_renewal_cost', e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+        </div>
+        <Field label="Additional Notes">
+          <textarea
+            rows={3}
+            placeholder="e.g. Native QuickBooks connector. Setup takes 2-3 days."
+            value={form.q3_notes}
+            onChange={e => set('q3_notes', e.target.value)}
             className={textareaClass}
           />
         </Field>

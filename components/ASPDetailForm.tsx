@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { updateASP } from '@/app/actions'
+import EmailSection from '@/components/EmailSection'
 import type { ASP, ASPStatus } from '@/lib/types'
 
 const STATUS_STYLES: Record<ASPStatus, string> = {
@@ -42,7 +43,8 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 const inputClass = "w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder-slate-300"
 const textareaClass = `${inputClass} resize-none`
 
-export default function ASPDetailForm({ asp }: { asp: ASP }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[] }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [saved, setSaved] = useState(false)
@@ -184,6 +186,9 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
           </Field>
         </div>
       </div>
+
+      {/* Email outreach */}
+      <EmailSection asp={asp} initialEmails={emails} />
 
       {/* Option 1: Freemium */}
       <Section

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { sendEmailToASP, syncEmailReplies, parseEmailWithAI } from '@/app/actions'
 import { getGreeting, buildEmailText } from '@/lib/email-template'
@@ -99,6 +99,7 @@ export default function EmailSection({ asp, initialEmails }: {
 }) {
   const router = useRouter()
   const [emails, setEmails] = useState(initialEmails)
+  useEffect(() => { setEmails(initialEmails) }, [initialEmails])
   const [showPreview, setShowPreview] = useState(false)
   const [isSending, startSend] = useTransition()
   const [isSyncing, startSync] = useTransition()

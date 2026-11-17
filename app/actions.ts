@@ -74,13 +74,29 @@ export async function sendEmailToASP(aspId: string) {
   // Append a copy to the Sent folder via IMAP
   try {
     const { ImapFlow } = await import('imapflow')
-    // @ts-ignore — subpath import, no types
-    const MailComposer = (await import('nodemailer/lib/mail-composer')).default
-    const rawMessage = await new Promise<Buffer>((resolve, reject) => {
-      new MailComposer(mailOptions).compile().build((err: Error | null, buf: Buffer) => {
-        if (err) reject(err); else resolve(buf)
-      })
-    })
+    const boundary = `----=_Part_${Date.now()}_${Math.random().toString(36).slice(2)}`
+    const rawMessage = Buffer.from(
+      [
+        `From: Paul Winick <${EMAIL_USER}>`,
+        `To: ${toAddresses}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+        `Date: ${new Date().toUTCString()}`,
+        ``,
+        `--${boundary}`,
+        `Content-Type: text/plain; charset=UTF-8`,
+        ``,
+        buildEmailText(greeting),
+        ``,
+        `--${boundary}`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        buildEmailHtml(greeting),
+        ``,
+        `--${boundary}--`,
+      ].join('\r\n')
+    )
     const imap = new ImapFlow(getImapConfig())
     await imap.connect()
     try {

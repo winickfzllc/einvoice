@@ -15,10 +15,12 @@ export interface ASP {
   q1_invoice_limit: string | null
   q1_notes: string | null
   // Option 2: Manual / CSV upload
+  q2_invoice_limit: string | null
   q2_year1_cost: string | null
   q2_renewal_cost: string | null
   q2_notes: string | null
   // Option 3: Integration (QuickBooks etc.)
+  q3_invoice_limit: string | null
   q3_year1_cost: string | null
   q3_renewal_cost: string | null
   q3_notes: string | null

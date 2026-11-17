@@ -34,8 +34,8 @@ function exportCSV(asps: ASP[]) {
     '#', 'Name', 'Accreditation #', 'Website', 'Contact Person', 'Email', 'Phone',
     'Status', 'Last Contacted',
     'Option 1 Freemium', 'Option 1 Invoice Limit', 'Option 1 Notes',
-    'Option 2 Year 1 Cost', 'Option 2 Renewal Cost', 'Option 2 Notes',
-    'Option 3 Year 1 Cost', 'Option 3 Renewal Cost', 'Option 3 Notes',
+    'Option 2 Invoice Limit', 'Option 2 Year 1 Cost', 'Option 2 Renewal Cost', 'Option 2 Notes',
+    'Option 3 Invoice Limit', 'Option 3 Year 1 Cost', 'Option 3 Renewal Cost', 'Option 3 Notes',
     'General Notes',
   ]
   const rows = asps.map(a => [
@@ -51,9 +51,11 @@ function exportCSV(asps: ASP[]) {
     a.q1_freemium == null ? '' : a.q1_freemium ? 'Yes' : 'No',
     a.q1_invoice_limit ?? '',
     a.q1_notes ?? '',
+    a.q2_invoice_limit ?? '',
     a.q2_year1_cost ?? '',
     a.q2_renewal_cost ?? '',
     a.q2_notes ?? '',
+    a.q3_invoice_limit ?? '',
     a.q3_year1_cost ?? '',
     a.q3_renewal_cost ?? '',
     a.q3_notes ?? '',

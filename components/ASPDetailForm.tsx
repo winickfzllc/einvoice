@@ -54,9 +54,11 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
     q1_freemium: asp.q1_freemium,
     q1_invoice_limit: asp.q1_invoice_limit ?? '',
     q1_notes: asp.q1_notes ?? '',
+    q2_invoice_limit: asp.q2_invoice_limit ?? '',
     q2_year1_cost: asp.q2_year1_cost ?? '',
     q2_renewal_cost: asp.q2_renewal_cost ?? '',
     q2_notes: asp.q2_notes ?? '',
+    q3_invoice_limit: asp.q3_invoice_limit ?? '',
     q3_year1_cost: asp.q3_year1_cost ?? '',
     q3_renewal_cost: asp.q3_renewal_cost ?? '',
     q3_notes: asp.q3_notes ?? '',
@@ -77,9 +79,11 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
           last_contacted: form.last_contacted || null,
           q1_invoice_limit: form.q1_invoice_limit || null,
           q1_notes: form.q1_notes || null,
+          q2_invoice_limit: form.q2_invoice_limit || null,
           q2_year1_cost: form.q2_year1_cost || null,
           q2_renewal_cost: form.q2_renewal_cost || null,
           q2_notes: form.q2_notes || null,
+          q3_invoice_limit: form.q3_invoice_limit || null,
           q3_year1_cost: form.q3_year1_cost || null,
           q3_renewal_cost: form.q3_renewal_cost || null,
           q3_notes: form.q3_notes || null,
@@ -229,14 +233,23 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
 
       {/* Option 2: Manual / CSV */}
       <Section
-        title="Option 2 — Manual Input / CSV Upload (< 100 invoices/year)"
-        description="Pricing for onboarding and platform fee for manual input or Excel/CSV upload for less than 100 invoices per year."
+        title="Option 2 — Manual Input / CSV Upload"
+        description="Pricing for onboarding and platform fee for manual input or Excel/CSV upload."
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Field label="Invoice Limit (base tier)" hint="Number of invoices included at the quoted price">
+            <input
+              type="text"
+              placeholder="e.g. 2,000 invoices/year"
+              value={form.q2_invoice_limit}
+              onChange={e => set('q2_invoice_limit', e.target.value)}
+              className={inputClass}
+            />
+          </Field>
           <Field label="Year 1 Full Cost (inc. onboarding)" hint="All-in cost for year one">
             <input
               type="text"
-              placeholder="e.g. AED 2,500 (AED 1,000 onboarding + AED 1,500 platform)"
+              placeholder="e.g. AED 500/year"
               value={form.q2_year1_cost}
               onChange={e => set('q2_year1_cost', e.target.value)}
               className={inputClass}
@@ -245,17 +258,17 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
           <Field label="Annual Renewal Cost" hint="Ongoing cost from year 2+">
             <input
               type="text"
-              placeholder="e.g. AED 1,500/year"
+              placeholder="e.g. AED 500/year"
               value={form.q2_renewal_cost}
               onChange={e => set('q2_renewal_cost', e.target.value)}
               className={inputClass}
             />
           </Field>
         </div>
-        <Field label="Additional Notes">
+        <Field label="Additional Notes" hint="Higher tiers, volume pricing, or other conditions">
           <textarea
             rows={3}
-            placeholder="e.g. Includes up to 100 invoices/year. Additional invoices charged at AED 5 each."
+            placeholder="e.g. Starter Plus: AED 1,500/year for up to 6,000 invoices. Starter Basic: AED 500/year for up to 2,000."
             value={form.q2_notes}
             onChange={e => set('q2_notes', e.target.value)}
             className={textareaClass}
@@ -268,11 +281,20 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
         title="Option 3 — Integration (QuickBooks / ERP)"
         description="Pricing for QuickBooks or ERP integration including Year 1 (inc. onboarding) and annual renewal thereafter."
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Field label="Invoice Limit (base tier)" hint="Number of invoices included at the quoted price">
+            <input
+              type="text"
+              placeholder="e.g. Unlimited / 10,000 invoices/year"
+              value={form.q3_invoice_limit}
+              onChange={e => set('q3_invoice_limit', e.target.value)}
+              className={inputClass}
+            />
+          </Field>
           <Field label="Year 1 Full Cost (inc. onboarding)" hint="All-in cost for year one with integration">
             <input
               type="text"
-              placeholder="e.g. AED 5,000 (AED 2,000 onboarding + AED 3,000 platform)"
+              placeholder="e.g. AED 6,000/year"
               value={form.q3_year1_cost}
               onChange={e => set('q3_year1_cost', e.target.value)}
               className={inputClass}
@@ -281,14 +303,14 @@ export default function ASPDetailForm({ asp }: { asp: ASP }) {
           <Field label="Annual Renewal Cost" hint="Ongoing cost from year 2+">
             <input
               type="text"
-              placeholder="e.g. AED 3,000/year"
+              placeholder="e.g. AED 6,000/year"
               value={form.q3_renewal_cost}
               onChange={e => set('q3_renewal_cost', e.target.value)}
               className={inputClass}
             />
           </Field>
         </div>
-        <Field label="Additional Notes">
+        <Field label="Additional Notes" hint="Higher tiers, volume pricing, or other conditions">
           <textarea
             rows={3}
             placeholder="e.g. Native QuickBooks connector. Setup takes 2-3 days."

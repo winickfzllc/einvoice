@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import type { ASP, ASPStatus } from '@/lib/types'
+import AddASPModal from './AddASPModal'
 
 const STATUS_STYLES: Record<ASPStatus, string> = {
   pending: 'bg-slate-100 text-slate-600',
@@ -80,6 +81,7 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
   const [statusFilter, setStatusFilter] = useState<ASPStatus | 'all'>('all')
   const [sortField, setSortField] = useState<SortField>('sort_order')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [showAddModal, setShowAddModal] = useState(false)
 
   const stats = useMemo(() => ({
     total: asps.length,
@@ -172,8 +174,16 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
           >
             Export CSV
           </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors whitespace-nowrap"
+          >
+            + Add ASP
+          </button>
         </div>
       </div>
+
+      {showAddModal && <AddASPModal onClose={() => setShowAddModal(false)} />}
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">

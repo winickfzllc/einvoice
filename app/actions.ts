@@ -6,6 +6,25 @@ import type { ASPUpdate } from '@/lib/types'
 import { createSmtpTransport, getImapConfig, EMAIL_USER } from '@/lib/email-utils'
 import { getGreeting, buildEmailHtml, buildEmailText, EMAIL_SUBJECT } from '@/lib/email-template'
 
+export async function createASP(data: {
+  name: string
+  accreditation_number?: string
+  website?: string
+  contact_person?: string
+  email?: string
+  phone?: string
+}) {
+  const { data: created, error } = await supabase
+    .from('asps')
+    .insert({ ...data, status: 'pending' })
+    .select('id')
+    .single()
+
+  if (error) throw new Error(error.message)
+  revalidatePath('/')
+  return created.id as string
+}
+
 export async function updateASP(id: string, data: ASPUpdate) {
   const { error } = await supabase
     .from('asps')

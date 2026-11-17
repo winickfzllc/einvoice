@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { sendEmailToASP, syncEmailReplies, parseEmailWithAI } from '@/app/actions'
-import { getFirstName, buildEmailText } from '@/lib/email-template'
+import { getGreeting, buildEmailText } from '@/lib/email-template'
 import type { ASP } from '@/lib/types'
 
 interface Email {
@@ -107,8 +107,8 @@ export default function EmailSection({ asp, initialEmails }: {
 
   const hasSent = emails.some(e => e.direction === 'sent')
   const hasReplies = emails.some(e => e.direction === 'received')
-  const firstName = getFirstName(asp.contact_person)
-  const previewText = buildEmailText(firstName)
+  const greeting = getGreeting(asp.contact_person)
+  const previewText = buildEmailText(greeting)
 
   function flash(text: string, type: 'success' | 'error') {
     setMessage({ text, type })
@@ -202,7 +202,7 @@ export default function EmailSection({ asp, initialEmails }: {
           <div className="space-y-3">
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex-1 min-w-0">
-                <div className="text-xs text-slate-500">To: <span className="text-slate-700 font-medium">{asp.email}</span></div>
+                <div className="text-xs text-slate-500">To: <span className="text-slate-700 font-medium">{asp.email.split(',').map(e => e.trim()).join(', ')}</span></div>
                 <div className="text-xs text-slate-500 mt-0.5">Subject: <span className="text-slate-700">UAE eInvoicing - Pricing Enquiry</span></div>
               </div>
               <div className="flex gap-2 items-center">

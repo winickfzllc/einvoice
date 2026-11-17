@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { supabase } from '@/lib/supabase'
 import type { ASPUpdate } from '@/lib/types'
 import { createSmtpTransport, getImapConfig, EMAIL_USER } from '@/lib/email-utils'
-import { getFirstName, buildEmailHtml, buildEmailText, EMAIL_SUBJECT } from '@/lib/email-template'
+import { getGreeting, buildEmailHtml, buildEmailText, EMAIL_SUBJECT } from '@/lib/email-template'
 
 export async function updateASP(id: string, data: ASPUpdate) {
   const { error } = await supabase
@@ -53,16 +53,19 @@ export async function sendEmailToASP(aspId: string) {
   const asp = await getASP(aspId)
   if (!asp.email) throw new Error('No email address for this ASP')
 
-  const firstName = getFirstName(asp.contact_person)
+  const greeting = getGreeting(asp.contact_person)
   const transport = createSmtpTransport()
   const subject = EMAIL_SUBJECT
 
+  // Support comma-separated list of email addresses
+  const toAddresses = asp.email.split(',').map((e: string) => e.trim()).filter(Boolean).join(', ')
+
   const mailOptions = {
     from: `Paul Winick <${EMAIL_USER}>`,
-    to: asp.email,
+    to: toAddresses,
     subject,
-    text: buildEmailText(firstName),
-    html: buildEmailHtml(firstName),
+    text: buildEmailText(greeting),
+    html: buildEmailHtml(greeting),
   }
 
   const info = await transport.sendMail(mailOptions)
@@ -95,10 +98,10 @@ export async function sendEmailToASP(aspId: string) {
     asp_id: aspId,
     direction: 'sent',
     subject,
-    body_text: buildEmailText(firstName),
-    body_html: buildEmailHtml(firstName),
+    body_text: buildEmailText(greeting),
+    body_html: buildEmailHtml(greeting),
     from_address: EMAIL_USER,
-    to_address: asp.email,
+    to_address: toAddresses,
     message_id: messageId,
     email_date: new Date().toISOString(),
   })
@@ -124,9 +127,12 @@ export async function syncEmailReplies() {
 
   if (!asps?.length) return { matched: 0 }
 
-  const emailToAspId = new Map(
-    asps.map(a => [a.email!.toLowerCase().trim(), a.id])
-  )
+  const emailToAspId = new Map<string, string>()
+  for (const a of asps) {
+    for (const addr of a.email!.split(',')) {
+      emailToAspId.set(addr.toLowerCase().trim(), a.id)
+    }
+  }
 
   const { data: sentEmails } = await supabase
     .from('emails')

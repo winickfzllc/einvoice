@@ -2,9 +2,16 @@ import { EMAIL_SIGNATURE } from './signature'
 
 export const EMAIL_SUBJECT = 'UAE eInvoicing - Pricing Enquiry'
 
-export function getFirstName(contactPerson: string | null): string {
+export function getGreeting(contactPerson: string | null): string {
   if (!contactPerson) return 'there'
-  return contactPerson.split(',')[0].trim().split(' ')[0]
+  const names = contactPerson.split(',').map(s => s.trim()).filter(Boolean)
+  if (names.length > 1) return 'All'
+  return names[0].split(' ')[0]
+}
+
+// kept for backwards compat (preview text in EmailSection)
+export function getFirstName(contactPerson: string | null): string {
+  return getGreeting(contactPerson)
 }
 
 export function buildEmailHtml(contactName: string): string {

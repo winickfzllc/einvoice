@@ -14,15 +14,31 @@ export async function createASP(data: {
   email?: string
   phone?: string
 }) {
+  const { data: maxRow } = await supabase
+    .from('asps')
+    .select('sort_order')
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const nextOrder = (maxRow?.sort_order ?? 0) + 1
+
   const { data: created, error } = await supabase
     .from('asps')
-    .insert({ ...data, status: 'pending' })
+    .insert({ ...data, status: 'pending', sort_order: nextOrder })
     .select('id')
     .single()
 
   if (error) throw new Error(error.message)
   revalidatePath('/')
   return created.id as string
+}
+
+export async function deleteASP(id: string) {
+  await supabase.from('emails').delete().eq('asp_id', id)
+  const { error } = await supabase.from('asps').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/')
 }
 
 export async function updateASP(id: string, data: ASPUpdate) {

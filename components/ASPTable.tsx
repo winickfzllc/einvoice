@@ -108,7 +108,7 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
     }
     return [...result].sort((a, b) => {
       let cmp = 0
-      if (sortField === 'sort_order') cmp = (a.sort_order ?? 0) - (b.sort_order ?? 0)
+      if (sortField === 'sort_order') cmp = (a.sort_order ?? Infinity) - (b.sort_order ?? Infinity)
       else if (sortField === 'name') cmp = a.name.localeCompare(b.name)
       else if (sortField === 'status') cmp = a.status.localeCompare(b.status)
       return sortDir === 'asc' ? cmp : -cmp

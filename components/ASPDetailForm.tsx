@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { updateASP } from '@/app/actions'
+import { updateASP, deleteASP } from '@/app/actions'
 import EmailSection from '@/components/EmailSection'
 import type { ASP, ASPStatus } from '@/lib/types'
 
@@ -49,6 +49,7 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
   const [isPending, startTransition] = useTransition()
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [form, setForm] = useState({
     status: asp.status as ASPStatus,
@@ -118,6 +119,34 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
             </span>
           )}
           {error && <span className="text-xs text-red-600">{error}</span>}
+          {confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-600">Delete this ASP?</span>
+              <button
+                onClick={() => startTransition(async () => {
+                  await deleteASP(asp.id)
+                  router.push('/')
+                })}
+                disabled={isPending}
+                className="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                Yes, delete
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-3 py-1.5 text-xs text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Delete
+            </button>
+          )}
           <button
             onClick={handleSave}
             disabled={isPending}

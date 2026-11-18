@@ -205,7 +205,7 @@ export async function syncEmailReplies() {
     try {
       const since = new Date()
       since.setDate(since.getDate() - 90)
-      const rawUids = await client.search({ since, seen: false }, { uid: true })
+      const rawUids = await client.search({ since }, { uid: true })
       const uids: number[] = Array.isArray(rawUids) ? rawUids : []
 
       if (!uids.length) return { matched: 0 }
@@ -229,12 +229,15 @@ export async function syncEmailReplies() {
 
         let aspId: string | null = null
 
+        // 1. Exact from-address match
         if (fromAddress && emailToAspId.has(fromAddress)) {
           aspId = emailToAspId.get(fromAddress)!
         }
+        // 2. In-Reply-To header matches a sent message ID
         if (!aspId && rawInReplyTo && msgIdToAspId.has(rawInReplyTo)) {
           aspId = msgIdToAspId.get(rawInReplyTo)!
         }
+        // 3. References header matches a sent message ID
         if (!aspId) {
           const refs: string[] = Array.isArray(parsed.references)
             ? parsed.references as string[]
@@ -242,6 +245,15 @@ export async function syncEmailReplies() {
           for (const ref of refs) {
             const r = ref.replace(/[<>]/g, '').trim()
             if (msgIdToAspId.has(r)) { aspId = msgIdToAspId.get(r)!; break }
+          }
+        }
+        // 4. Domain fallback — catches replies from colleagues at the same company
+        if (!aspId && fromAddress) {
+          const senderDomain = fromAddress.split('@')[1]
+          if (senderDomain) {
+            for (const [storedAddr, id] of emailToAspId) {
+              if (storedAddr.split('@')[1] === senderDomain) { aspId = id; break }
+            }
           }
         }
 

@@ -224,9 +224,8 @@ export async function syncEmailReplies() {
         let bodyText = parsed.text ?? ''
         if (parsed.attachments?.length) {
           try {
-            // Import the core module directly to avoid pdf-parse loading test files on serverless
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (await import('pdf-parse/lib/pdf-parse.js' as string) as any).default
+            // @ts-ignore — CJS default export; externalized so never bundled
+            const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (await import('pdf-parse')).default
             for (const attachment of parsed.attachments) {
               if (attachment.contentType === 'application/pdf' && attachment.content) {
                 try {

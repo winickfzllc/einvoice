@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { sendEmailToASP, syncEmailReplies, parseEmailWithAI } from '@/app/actions'
+import { sendEmailToASP, syncEmailReplies, parseEmailWithAI, deleteEmail } from '@/app/actions'
 import { getGreeting, buildEmailText, EMAIL_SUBJECT } from '@/lib/email-template'
 import type { ASP } from '@/lib/types'
 
@@ -24,9 +24,10 @@ function formatDate(iso: string) {
   })
 }
 
-function EmailThread({ emails, onParseAI }: {
+function EmailThread({ emails, onParseAI, onDelete }: {
   emails: Email[]
   onParseAI: (id: string) => void
+  onDelete: (id: string) => void
 }) {
   const [expanded, setExpanded] = useState<string | null>(null)
 
@@ -58,7 +59,16 @@ function EmailThread({ emails, onParseAI }: {
               </span>
               <span className="text-slate-700 truncate">{email.subject}</span>
             </div>
-            <span className="shrink-0 text-xs text-slate-400">{formatDate(email.email_date)}</span>
+            <div className="shrink-0 flex items-center gap-2">
+              <span className="text-xs text-slate-400">{formatDate(email.email_date)}</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(email.id) }}
+                className="text-slate-300 hover:text-red-500 transition-colors text-base leading-none"
+                title="Remove from thread"
+              >
+                &times;
+              </button>
+            </div>
           </button>
 
           {expanded === email.id && (
@@ -141,6 +151,17 @@ export default function EmailSection({ asp, initialEmails }: {
         router.refresh()
       } catch (e) {
         flash(e instanceof Error ? e.message : 'Sync failed', 'error')
+      }
+    })
+  }
+
+  function handleDelete(emailId: string) {
+    startTransition(async () => {
+      try {
+        await deleteEmail(emailId)
+        setEmails(prev => prev.filter(e => e.id !== emailId))
+      } catch (e) {
+        flash(e instanceof Error ? e.message : 'Delete failed', 'error')
       }
     })
   }
@@ -237,7 +258,7 @@ export default function EmailSection({ asp, initialEmails }: {
           </div>
         )}
 
-        <EmailThread emails={emails} onParseAI={handleParseAI} />
+        <EmailThread emails={emails} onParseAI={handleParseAI} onDelete={handleDelete} />
       </div>
     </div>
   )

@@ -34,6 +34,12 @@ export async function createASP(data: {
   return created.id as string
 }
 
+export async function deleteEmail(id: string) {
+  const { error } = await supabase.from('emails').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+  revalidatePath('/')
+}
+
 export async function deleteASP(id: string) {
   await supabase.from('emails').delete().eq('asp_id', id)
   const { error } = await supabase.from('asps').delete().eq('id', id)

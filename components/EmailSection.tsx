@@ -114,6 +114,7 @@ export default function EmailSection({ asp, initialEmails }: {
   const [isSending, startSend] = useTransition()
   const [isSyncing, startSync] = useTransition()
   const [isParsing, startParse] = useTransition()
+  const [, startDelete] = useTransition()
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
 
   const hasSent = emails.some(e => e.direction === 'sent')
@@ -156,7 +157,7 @@ export default function EmailSection({ asp, initialEmails }: {
   }
 
   function handleDelete(emailId: string) {
-    startTransition(async () => {
+    startDelete(async () => {
       try {
         await deleteEmail(emailId)
         setEmails(prev => prev.filter(e => e.id !== emailId))

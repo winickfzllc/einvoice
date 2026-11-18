@@ -217,20 +217,24 @@ export async function syncEmailReplies() {
         // Extract text from PDF attachments and append to body
         let bodyText = parsed.text ?? ''
         if (parsed.attachments?.length) {
-          const pdfParseModule = await import('pdf-parse')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (pdfParseModule as any).default ?? pdfParseModule
-          for (const attachment of parsed.attachments) {
-            if (attachment.contentType === 'application/pdf' && attachment.content) {
-              try {
-                const pdfData = await pdfParse(attachment.content as Buffer)
-                if (pdfData.text?.trim()) {
-                  bodyText += `\n\n--- Attachment: ${attachment.filename ?? 'document.pdf'} ---\n${pdfData.text.trim()}`
+          try {
+            // Import the core module directly to avoid pdf-parse loading test files on serverless
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (await import('pdf-parse/lib/pdf-parse.js' as string) as any).default
+            for (const attachment of parsed.attachments) {
+              if (attachment.contentType === 'application/pdf' && attachment.content) {
+                try {
+                  const pdfData = await pdfParse(attachment.content as Buffer)
+                  if (pdfData.text?.trim()) {
+                    bodyText += `\n\n--- Attachment: ${attachment.filename ?? 'document.pdf'} ---\n${pdfData.text.trim()}`
+                  }
+                } catch {
+                  // skip unreadable PDF
                 }
-              } catch {
-                // skip unreadable PDF
               }
             }
+          } catch {
+            // pdf-parse unavailable in this environment — skip attachment extraction
           }
         }
 

@@ -94,11 +94,26 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter(a =>
-        a.name.toLowerCase().includes(q) ||
-        (a.contact_person ?? '').toLowerCase().includes(q) ||
-        (a.email ?? '').toLowerCase().includes(q) ||
-        (a.website ?? '').toLowerCase().includes(q) ||
-        (a.accreditation_number ?? '').includes(q)
+        [
+          a.name,
+          a.contact_person,
+          a.email,
+          a.website,
+          a.accreditation_number,
+          a.phone,
+          a.status,
+          a.q1_invoice_limit,
+          a.q1_notes,
+          a.q2_invoice_limit,
+          a.q2_year1_cost,
+          a.q2_renewal_cost,
+          a.q2_notes,
+          a.q3_invoice_limit,
+          a.q3_year1_cost,
+          a.q3_renewal_cost,
+          a.q3_notes,
+          a.general_notes,
+        ].some(field => (field ?? '').toLowerCase().includes(q))
       )
     }
     if (statusFilter !== 'all') {
@@ -160,7 +175,7 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
         <div className="flex gap-2 w-full sm:w-auto">
           <input
             type="text"
-            placeholder="Search name, contact, email…"
+            placeholder="Search name, contact, notes, pricing…"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="flex-1 sm:w-64 px-3 py-1.5 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"

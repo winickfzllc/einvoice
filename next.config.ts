@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['nodemailer', 'nodemailer/lib/mail-composer', 'imapflow', 'mailparser'],
+  serverExternalPackages: ['nodemailer', 'nodemailer/lib/mail-composer', 'imapflow', 'mailparser', 'pdf-parse'],
   turbopack: {
     rules: {
       "*.css": {

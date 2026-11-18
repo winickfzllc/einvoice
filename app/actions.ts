@@ -214,6 +214,24 @@ export async function syncEmailReplies() {
         if (!msg.source) continue
         const parsed = await simpleParser(Buffer.from(msg.source))
 
+        // Extract text from PDF attachments and append to body
+        let bodyText = parsed.text ?? ''
+        if (parsed.attachments?.length) {
+          const pdfParse = (await import('pdf-parse')).default
+          for (const attachment of parsed.attachments) {
+            if (attachment.contentType === 'application/pdf' && attachment.content) {
+              try {
+                const pdfData = await pdfParse(attachment.content as Buffer)
+                if (pdfData.text?.trim()) {
+                  bodyText += `\n\n--- Attachment: ${attachment.filename ?? 'document.pdf'} ---\n${pdfData.text.trim()}`
+                }
+              } catch {
+                // skip unreadable PDF
+              }
+            }
+          }
+        }
+
         const fromAddress = parsed.from?.value?.[0]?.address?.toLowerCase().trim()
         const rawMsgId = parsed.messageId?.replace(/[<>]/g, '').trim()
         const rawInReplyTo = parsed.inReplyTo?.replace(/[<>]/g, '').trim()
@@ -263,7 +281,7 @@ export async function syncEmailReplies() {
           asp_id: aspId,
           direction: 'received',
           subject: parsed.subject ?? '',
-          body_text: parsed.text ?? '',
+          body_text: bodyText,
           body_html: typeof parsed.html === 'string' ? parsed.html : '',
           from_address: fromAddress ?? '',
           to_address: EMAIL_USER,

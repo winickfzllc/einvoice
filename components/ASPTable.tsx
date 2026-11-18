@@ -86,7 +86,7 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
   const stats = useMemo(() => ({
     total: asps.length,
     pending: asps.filter(a => a.status === 'pending').length,
-    contacted: asps.filter(a => a.status === 'contacted').length,
+    contacted: asps.filter(a => a.status === 'contacted' || a.status === 'responded').length,
     responded: asps.filter(a => a.status === 'responded').length,
     completed: asps.filter(a => a.status === 'completed').length,
   }), [asps])

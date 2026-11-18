@@ -230,12 +230,12 @@ export async function syncEmailReplies() {
           const results: string[] = []
           for (const attachment of pdfAttachments) {
             const name = attachment.filename ?? 'document.pdf'
-            const text = await extractPdfText(attachment.content as Buffer)
+            const { text, error } = await extractPdfText(attachment.content as Buffer)
             if (text) {
               bodyText += `\n\n--- Attachment: ${name} ---\n${text}`
               results.push(`${name} ✓`)
             } else {
-              results.push(`${name} (parse failed)`)
+              results.push(`${name} (${error ?? 'empty'})`)
             }
           }
           bodyText = `[Attachments: ${results.join(', ')}]\n\n${bodyText}`

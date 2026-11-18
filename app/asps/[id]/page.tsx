@@ -16,5 +16,5 @@ export default async function ASPDetailPage({ params }: { params: Promise<{ id: 
 
   if (!asp) notFound()
 
-  return <ASPDetailForm asp={asp} emails={emails} />
+  return <ASPDetailForm key={asp.updated_at} asp={asp} emails={emails} />
 }

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { supabase } from '@/lib/supabase'
 import type { ASPUpdate } from '@/lib/types'
 import { createSmtpTransport, getImapConfig, EMAIL_USER } from '@/lib/email-utils'
+import { extractPdfText } from '@/lib/pdf-extract'
 import { getGreeting, buildEmailHtml, buildEmailText, EMAIL_SUBJECT } from '@/lib/email-template'
 
 export async function createASP(data: {
@@ -227,27 +228,16 @@ export async function syncEmailReplies() {
         )
         if (pdfAttachments.length) {
           const results: string[] = []
-          try {
-            // @ts-ignore — CJS default export; externalized so never bundled
-            const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (await import('pdf-parse')).default
-            for (const attachment of pdfAttachments) {
-              const name = attachment.filename ?? 'document.pdf'
-              try {
-                const pdfData = await pdfParse(attachment.content as Buffer)
-                if (pdfData.text?.trim()) {
-                  bodyText += `\n\n--- Attachment: ${name} ---\n${pdfData.text.trim()}`
-                  results.push(`${name} ✓`)
-                } else {
-                  results.push(`${name} (empty)`)
-                }
-              } catch {
-                results.push(`${name} (parse failed)`)
-              }
+          for (const attachment of pdfAttachments) {
+            const name = attachment.filename ?? 'document.pdf'
+            const text = await extractPdfText(attachment.content as Buffer)
+            if (text) {
+              bodyText += `\n\n--- Attachment: ${name} ---\n${text}`
+              results.push(`${name} ✓`)
+            } else {
+              results.push(`${name} (parse failed)`)
             }
-          } catch {
-            pdfAttachments.forEach(a => results.push(`${a.filename ?? 'document.pdf'} (unavailable)`))
           }
-          // Prepend attachment summary so the UI and AI both see it
           bodyText = `[Attachments: ${results.join(', ')}]\n\n${bodyText}`
         }
 

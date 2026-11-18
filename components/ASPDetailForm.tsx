@@ -50,8 +50,15 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [editingContact, setEditingContact] = useState(false)
 
   const [form, setForm] = useState({
+    name: asp.name,
+    accreditation_number: asp.accreditation_number ?? '',
+    website: asp.website ?? '',
+    contact_person: asp.contact_person ?? '',
+    email: asp.email ?? '',
+    phone: asp.phone ?? '',
     status: asp.status as ASPStatus,
     last_contacted: asp.last_contacted ?? '',
     q1_freemium: asp.q1_freemium,
@@ -79,6 +86,11 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
       try {
         await updateASP(asp.id, {
           ...form,
+          accreditation_number: form.accreditation_number || null,
+          website: form.website || null,
+          contact_person: form.contact_person || null,
+          email: form.email || null,
+          phone: form.phone || null,
           last_contacted: form.last_contacted || null,
           q1_invoice_limit: form.q1_invoice_limit || null,
           q1_notes: form.q1_notes || null,
@@ -93,6 +105,7 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
           general_notes: form.general_notes || null,
         })
         setSaved(true)
+        setEditingContact(false)
         setTimeout(() => setSaved(false), 3000)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Save failed')
@@ -160,47 +173,79 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
       {/* ASP header card */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">{asp.name}</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Accreditation #{asp.accreditation_number}</p>
+          <div className="flex-1 min-w-0">
+            {editingContact ? (
+              <input
+                value={form.name}
+                onChange={e => set('name', e.target.value)}
+                className="text-lg font-semibold text-slate-900 w-full border-b border-slate-300 focus:outline-none focus:border-emerald-500 bg-transparent pb-0.5"
+              />
+            ) : (
+              <h2 className="text-lg font-semibold text-slate-900">{form.name}</h2>
+            )}
+            {editingContact ? (
+              <input
+                value={form.accreditation_number}
+                onChange={e => set('accreditation_number', e.target.value)}
+                placeholder="Accreditation #"
+                className="text-sm text-slate-500 mt-1 w-full border-b border-slate-200 focus:outline-none focus:border-emerald-500 bg-transparent pb-0.5"
+              />
+            ) : (
+              <p className="text-sm text-slate-500 mt-0.5">Accreditation #{form.accreditation_number || '—'}</p>
+            )}
           </div>
-          <select
-            value={form.status}
-            onChange={e => set('status', e.target.value as ASPStatus)}
-            className={`text-sm font-medium border rounded-full px-3 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer ${STATUS_STYLES[form.status]}`}
-          >
-            <option value="pending">Pending</option>
-            <option value="contacted">Contacted</option>
-            <option value="responded">Responded</option>
-            <option value="completed">Completed</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditingContact(e => !e)}
+              className="px-3 py-1 text-xs text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              {editingContact ? 'Cancel' : 'Edit'}
+            </button>
+            <select
+              value={form.status}
+              onChange={e => set('status', e.target.value as ASPStatus)}
+              className={`text-sm font-medium border rounded-full px-3 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer ${STATUS_STYLES[form.status]}`}
+            >
+              <option value="pending">Pending</option>
+              <option value="contacted">Contacted</option>
+              <option value="responded">Responded</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-100">
           <div>
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide">Website</div>
-            {asp.website ? (
-              <a href={`https://${asp.website}`} target="_blank" rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline mt-1 block truncate">
-                {asp.website}
-              </a>
-            ) : <div className="text-sm text-slate-300 mt-1">—</div>}
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Website</div>
+            {editingContact ? (
+              <input value={form.website} onChange={e => set('website', e.target.value)} placeholder="www.example.com" className={inputClass} />
+            ) : form.website ? (
+              <a href={`https://${form.website}`} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline block truncate">{form.website}</a>
+            ) : <div className="text-sm text-slate-300">—</div>}
           </div>
           <div>
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide">Contact Person</div>
-            <div className="text-sm text-slate-700 mt-1">{asp.contact_person ?? '—'}</div>
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Contact Person</div>
+            {editingContact ? (
+              <input value={form.contact_person} onChange={e => set('contact_person', e.target.value)} className={inputClass} />
+            ) : (
+              <div className="text-sm text-slate-700">{form.contact_person || '—'}</div>
+            )}
           </div>
           <div>
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide">Email</div>
-            {asp.email ? (
-              <a href={`mailto:${asp.email}`} className="text-sm text-blue-600 hover:underline mt-1 block truncate">
-                {asp.email}
-              </a>
-            ) : <div className="text-sm text-slate-300 mt-1">—</div>}
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Email</div>
+            {editingContact ? (
+              <input value={form.email} onChange={e => set('email', e.target.value)} className={inputClass} />
+            ) : form.email ? (
+              <a href={`mailto:${form.email}`} className="text-sm text-blue-600 hover:underline block truncate">{form.email}</a>
+            ) : <div className="text-sm text-slate-300">—</div>}
           </div>
           <div>
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide">Phone</div>
-            <div className="text-sm text-slate-700 mt-1">{asp.phone ?? '—'}</div>
+            <div className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-1">Phone</div>
+            {editingContact ? (
+              <input value={form.phone} onChange={e => set('phone', e.target.value)} className={inputClass} />
+            ) : (
+              <div className="text-sm text-slate-700">{form.phone || '—'}</div>
+            )}
           </div>
         </div>
 

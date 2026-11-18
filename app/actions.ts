@@ -321,6 +321,11 @@ export async function parseEmailWithAI(emailId: string) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
   const bodyToAnalyse = email.body_text || email.body_html?.replace(/<[^>]+>/g, ' ') || ''
+  const emailDate = new Date(email.email_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+
+  // Fetch existing general_notes so we can append rather than overwrite
+  const { data: aspRow } = await supabase.from('asps').select('general_notes').eq('id', email.asp_id).single()
+  const existingNotes = aspRow?.general_notes ?? ''
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -341,13 +346,18 @@ Return ONLY valid JSON (no explanation) with these fields — use null for anyth
   "q3_invoice_limit": "string or null",
   "q3_year1_cost": "string or null",
   "q3_renewal_cost": "string or null",
-  "q3_notes": "string or null"
+  "q3_notes": "string or null",
+  "general_notes": "string or null"
 }
 
 Definitions:
 - q1 = freemium/free tier
 - q2 = manual input / CSV / Excel upload pricing
 - q3 = QuickBooks or ERP integration pricing
+- general_notes = use this ONLY if the email contains a holding message (e.g. "will get back to you", "colleague will be in touch", "will follow up", "forwarding to the right person") and no pricing data. Format as "${emailDate}: <brief summary of what they said>". If there are already existing notes below, append on a new line. Leave null if the email contains actual pricing information.
+
+Existing general_notes (append to these if needed, do not repeat them):
+${existingNotes || '(none)'}
 
 Email body:
 ${bodyToAnalyse}`,
@@ -360,7 +370,13 @@ ${bodyToAnalyse}`,
 
   const extracted = JSON.parse(jsonMatch[0])
 
-  await supabase.from('asps').update(extracted).eq('id', email.asp_id)
+  // Only write non-null fields back (don't overwrite existing data with nulls)
+  const toWrite = Object.fromEntries(
+    Object.entries(extracted).filter(([, v]) => v !== null)
+  )
+  if (Object.keys(toWrite).length > 0) {
+    await supabase.from('asps').update(toWrite).eq('id', email.asp_id)
+  }
   await supabase.from('emails').update({ ai_parsed: true }).eq('id', emailId)
 
   revalidatePath('/')

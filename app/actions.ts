@@ -217,7 +217,9 @@ export async function syncEmailReplies() {
         // Extract text from PDF attachments and append to body
         let bodyText = parsed.text ?? ''
         if (parsed.attachments?.length) {
-          const pdfParse = (await import('pdf-parse')).default
+          const pdfParseModule = await import('pdf-parse')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (pdfParseModule as any).default ?? pdfParseModule
           for (const attachment of parsed.attachments) {
             if (attachment.contentType === 'application/pdf' && attachment.content) {
               try {

@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { sendEmailToASP, syncEmailReplies, parseEmailWithAI } from '@/app/actions'
-import { getGreeting, buildEmailText } from '@/lib/email-template'
+import { getGreeting, buildEmailText, EMAIL_SUBJECT } from '@/lib/email-template'
 import type { ASP } from '@/lib/types'
 
 interface Email {
@@ -204,7 +204,7 @@ export default function EmailSection({ asp, initialEmails }: {
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-slate-500">To: <span className="text-slate-700 font-medium">{asp.email.split(',').map(e => e.trim()).join(', ')}</span></div>
-                <div className="text-xs text-slate-500 mt-0.5">Subject: <span className="text-slate-700">UAE eInvoicing - Pricing Enquiry</span></div>
+                <div className="text-xs text-slate-500 mt-0.5">Subject: <span className="text-slate-700">{asp.name} - {EMAIL_SUBJECT}</span></div>
               </div>
               <div className="flex gap-2 items-center">
                 <button

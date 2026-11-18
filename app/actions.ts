@@ -90,7 +90,7 @@ export async function sendEmailToASP(aspId: string) {
 
   const greeting = getGreeting(asp.contact_person)
   const transport = createSmtpTransport()
-  const subject = EMAIL_SUBJECT
+  const subject = `${asp.name} - ${EMAIL_SUBJECT}`
 
   // Support comma-separated list of email addresses
   const toAddresses = asp.email.split(',').map((e: string) => e.trim()).filter(Boolean).join(', ')

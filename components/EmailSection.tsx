@@ -58,6 +58,15 @@ function EmailThread({ emails, onParseAI, onDelete }: {
                 {email.direction === 'sent' ? '→ Sent' : '← Reply'}
               </span>
               <span className="text-slate-700 truncate">{email.subject}</span>
+              {email.body_text?.startsWith('[Attachments:') && (() => {
+                const line = email.body_text.split('\n')[0]
+                const allOk = !line.includes('failed') && !line.includes('unavailable') && !line.includes('empty')
+                return (
+                  <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${allOk ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+                    {allOk ? '📎 PDF extracted' : '📎 PDF issues'}
+                  </span>
+                )
+              })()}
             </div>
             <div className="shrink-0 flex items-center gap-2">
               <span className="text-xs text-slate-400">{formatDate(email.email_date)}</span>

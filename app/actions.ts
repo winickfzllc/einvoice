@@ -222,25 +222,33 @@ export async function syncEmailReplies() {
 
         // Extract text from PDF attachments and append to body
         let bodyText = parsed.text ?? ''
-        if (parsed.attachments?.length) {
+        const pdfAttachments = (parsed.attachments ?? []).filter(
+          a => a.contentType === 'application/pdf' && a.content
+        )
+        if (pdfAttachments.length) {
+          const results: string[] = []
           try {
             // @ts-ignore — CJS default export; externalized so never bundled
             const pdfParse: (buf: Buffer) => Promise<{ text: string }> = (await import('pdf-parse')).default
-            for (const attachment of parsed.attachments) {
-              if (attachment.contentType === 'application/pdf' && attachment.content) {
-                try {
-                  const pdfData = await pdfParse(attachment.content as Buffer)
-                  if (pdfData.text?.trim()) {
-                    bodyText += `\n\n--- Attachment: ${attachment.filename ?? 'document.pdf'} ---\n${pdfData.text.trim()}`
-                  }
-                } catch {
-                  // skip unreadable PDF
+            for (const attachment of pdfAttachments) {
+              const name = attachment.filename ?? 'document.pdf'
+              try {
+                const pdfData = await pdfParse(attachment.content as Buffer)
+                if (pdfData.text?.trim()) {
+                  bodyText += `\n\n--- Attachment: ${name} ---\n${pdfData.text.trim()}`
+                  results.push(`${name} ✓`)
+                } else {
+                  results.push(`${name} (empty)`)
                 }
+              } catch {
+                results.push(`${name} (parse failed)`)
               }
             }
           } catch {
-            // pdf-parse unavailable in this environment — skip attachment extraction
+            pdfAttachments.forEach(a => results.push(`${a.filename ?? 'document.pdf'} (unavailable)`))
           }
+          // Prepend attachment summary so the UI and AI both see it
+          bodyText = `[Attachments: ${results.join(', ')}]\n\n${bodyText}`
         }
 
         const fromAddress = parsed.from?.value?.[0]?.address?.toLowerCase().trim()

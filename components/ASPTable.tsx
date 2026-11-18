@@ -9,7 +9,6 @@ const STATUS_STYLES: Record<ASPStatus, string> = {
   pending: 'bg-slate-100 text-slate-600',
   contacted: 'bg-blue-100 text-blue-700',
   responded: 'bg-amber-100 text-amber-700',
-  completed: 'bg-emerald-100 text-emerald-700',
 }
 
 function ResearchDot({ filled, label }: { filled: boolean; label: string }) {
@@ -88,7 +87,6 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
     pending: asps.filter(a => a.status === 'pending').length,
     contacted: asps.filter(a => a.status === 'contacted' || a.status === 'responded').length,
     responded: asps.filter(a => a.status === 'responded').length,
-    completed: asps.filter(a => a.status === 'completed').length,
   }), [asps])
 
   const filtered = useMemo(() => {
@@ -134,7 +132,6 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
           { label: 'Pending', value: stats.pending, color: 'bg-white border-slate-200 text-slate-500' },
           { label: 'Contacted', value: stats.contacted, color: 'bg-blue-50 border-blue-200 text-blue-700' },
           { label: 'Responded', value: stats.responded, color: 'bg-amber-50 border-amber-200 text-amber-700' },
-          { label: 'Completed', value: stats.completed, color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
         ].map(s => (
           <div key={s.label} className={`rounded-lg border px-4 py-3 ${s.color}`}>
             <div className="text-2xl font-bold">{s.value}</div>
@@ -146,7 +143,7 @@ export default function ASPTable({ asps }: { asps: ASP[] }) {
       {/* Controls */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="flex gap-2 flex-wrap">
-          {(['all', 'pending', 'contacted', 'responded', 'completed'] as const).map(s => (
+          {(['all', 'pending', 'contacted', 'responded'] as const).map(s => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}

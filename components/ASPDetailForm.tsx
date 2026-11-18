@@ -11,7 +11,6 @@ const STATUS_STYLES: Record<ASPStatus, string> = {
   pending: 'bg-slate-100 text-slate-700 border-slate-200',
   contacted: 'bg-blue-50 text-blue-700 border-blue-200',
   responded: 'bg-amber-50 text-amber-700 border-amber-200',
-  completed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 }
 
 function Section({ title, description, children }: {
@@ -209,7 +208,6 @@ export default function ASPDetailForm({ asp, emails }: { asp: ASP; emails: any[]
               <option value="pending">Pending</option>
               <option value="contacted">Contacted</option>
               <option value="responded">Responded</option>
-              <option value="completed">Completed</option>
             </select>
           </div>
         </div>

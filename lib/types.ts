@@ -1,4 +1,4 @@
-export type ASPStatus = 'pending' | 'contacted' | 'responded' | 'completed'
+export type ASPStatus = 'pending' | 'contacted' | 'responded'
 
 export interface ASP {
   id: string

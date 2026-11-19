@@ -363,7 +363,7 @@ Definitions:
 - q1 = freemium/free tier
 - q2 = manual input / CSV / Excel upload pricing
 - q3 = QuickBooks or ERP integration pricing
-- general_notes = use this ONLY if the email contains a holding message (e.g. "will get back to you", "colleague will be in touch", "will follow up", "forwarding to the right person") and no pricing data. Format as "${emailDate}: <brief summary of what they said>". If there are already existing notes below, append on a new line. Leave null if the email contains actual pricing information.
+- general_notes = use this whenever there is no specific pricing data to extract (e.g. holding messages like "will get back to you", company profile / brochure attachments, registration forms, meeting requests, forwarding to a colleague). Format as "${emailDate}: <brief summary of what the email/attachments actually contained and what was said>". IMPORTANT: if attachment text is included in the body below (sections starting "--- Attachment: ..."), it means the text was successfully extracted — do NOT say "PDFs failed to parse". Instead describe what the attachment contained (e.g. "company profile", "pricing model document", "registration form"). If there are already existing notes below, append on a new line. Leave null only if all relevant pricing fields are fully answered.
 
 Existing general_notes (append to these if needed, do not repeat them):
 ${existingNotes || '(none)'}
